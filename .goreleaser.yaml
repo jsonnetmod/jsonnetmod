@@ -1,0 +1,28 @@
+project_name: jsonnetmod
+dist: ./bin
+before:
+  hooks:
+    - go mod download -x
+builds:
+  - dir: ./cmd/jmod
+    binary: jmod
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/octohelm/jsonnetmod/pkg/version.Version={{ .Version }}+sha.{{ .FullCommit }}
+    mod_timestamp: '{{ .CommitTimestamp }}'
+checksum:
+  name_template: '{{ .ProjectName }}_checksums.txt'
+changelog:
+  filters:
+    exclude:
+      - '^docs'
+      - '^chore'
