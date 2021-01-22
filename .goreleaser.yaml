@@ -1,0 +1,23 @@
+project_name: tankax
+dist: ./bin
+before:
+  hooks:
+    - go mod download -x
+builds:
+  - dir: ./cmd/tkx
+    binary: tkx
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/grafana/tanka/pkg/tanka.CURRENT_VERSION={{ .Version }}+sha.{{ .FullCommit }}
+    mod_timestamp: '{{ .CommitTimestamp }}'
+checksum:
+  name_template: '{{ .ProjectName }}_checksums.txt'
