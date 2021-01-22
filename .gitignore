@@ -1,0 +1,5 @@
+bin/
+_output/
+vendor/
+
+coverage.txt
