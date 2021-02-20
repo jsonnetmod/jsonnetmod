@@ -8,12 +8,12 @@
 
 ## Requirements
 
-* go 1.11+ (need `go mod download -json` to download & cache deps)
+* go 1.16+ (need `go mod download -json` to download & cache deps)
 
 ## Install
 
 ```shell
-go get github.com/octohelm/jsonnetmod/cmd/jmod
+go install github.com/octohelm/jsonnetmod/cmd/jmod@latest
 ```
 
 ## Usage
