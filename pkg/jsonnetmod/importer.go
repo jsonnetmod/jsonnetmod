@@ -2,16 +2,14 @@ package jsonnetmod
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/google/go-jsonnet"
 	"github.com/pkg/errors"
+	"sigs.k8s.io/yaml"
 )
 
 type Resolver interface {
@@ -89,7 +87,7 @@ func (i *Importer) load(file string) (jsonnet.Contents, error) {
 
 	switch ext {
 	case ".yaml", ".yml":
-		d, err := yamlToJSON(data)
+		d, err := yaml.YAMLToJSON(data)
 		if err != nil {
 			return jsonnet.Contents{}, err
 		}
@@ -101,14 +99,6 @@ func (i *Importer) load(file string) (jsonnet.Contents, error) {
 	i.caches[file] = contents
 
 	return contents, nil
-}
-
-func yamlToJSON(data []byte) ([]byte, error) {
-	v := map[string]interface{}{}
-	if err := yaml.Unmarshal(data, &v); err != nil {
-		return nil, err
-	}
-	return json.MarshalIndent(v, "", "  ")
 }
 
 func patchFileContext(d []byte, file string) []byte {
