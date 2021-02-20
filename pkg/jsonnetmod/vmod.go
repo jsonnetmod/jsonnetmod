@@ -3,6 +3,7 @@ package jsonnetmod
 import (
 	"context"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -115,10 +116,25 @@ func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
 	v.SetRequire(p.Module, version, indirect)
 
 	if v.JPath != "" {
-		if err := util.Symlink(p.Dir, filepath.Join(v.Dir, v.
-			JPath, p.Module)); err != nil {
+		if err := util.Symlink(p.Dir, filepath.Join(v.Dir, v.JPath, p.Module)); err != nil {
 			return err
 		}
+
+		for from, to := range v.cache.replace {
+			if from.Path != to.Path && to.Path[0] != '.' {
+				if isSubDirFor(to.Path, p.Module) {
+					if err := util.Symlink(
+						path.Join(p.Dir, p.SubPath),
+						filepath.Join(v.Dir, v.JPath, from.Path),
+					); err != nil {
+						return err
+					}
+				}
+			}
+		}
+
+		// hack k.libsonnet
+		_ = util.WriteFile(path.Join(p.Dir, v.JPath, "k.libsonnet"), []byte(`import "k/main.libsonnet"`))
 	}
 
 	return WriteMod(v.Mod)
