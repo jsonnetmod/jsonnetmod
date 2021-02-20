@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.2](https://github.com/octohelm/jsonnetmod/compare/v0.0.1...v0.0.2)
+
+### Bug Fixes
+
+* **fix** use sigs.k8s.io/yaml to avoid covert yaml to json failed ([61ac039](https://github.com/octohelm/jsonnetmod/commit/61ac039e3cb47f934e5f30a0ee7ffba182670279))
+
+
+
 # [0.0.1](https://github.com/octohelm/jsonnetmod/compare/v0.0.0...v0.0.1)
 
 ### Bug Fixes
