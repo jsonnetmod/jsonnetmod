@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -26,10 +25,9 @@ func setupPersistentPreRun(cmd *cobra.Command, opts interface{}, fn runFn) *cobr
 
 func runE(fn runFn) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
-		log := logr.FromContextOrDiscard(cmd.Context())
-
 		if err := fn(cmd, args); err != nil {
-			log.Error(err, "execute failed")
+			fmt.Println("execute failed: ")
+			fmt.Println(err)
 		}
 	}
 }

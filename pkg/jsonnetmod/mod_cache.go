@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -31,16 +32,18 @@ type ModCache struct {
 }
 
 func (c *ModCache) LookupReplace(importPath string, version string) (matched PathReplace, replace PathReplace, exists bool) {
-	for p, rp := range c.replace {
-		if isSubDirFor(importPath, p.Path) {
-			if version == "" || version == "latest" {
-				return p, rp, true
-			}
-			if version == p.Version {
+	for _, path := range paths(importPath) {
+		for _, p := range []PathReplace{
+			{Path: path, Version: ""},
+			{Path: path, Version: "latest"},
+			{Path: path, Version: version},
+		} {
+			if rp, ok := c.replace[p]; ok {
 				return p, rp, true
 			}
 		}
 	}
+
 	return PathReplace{}, PathReplace{}, false
 }
 
@@ -94,7 +97,7 @@ func (c *ModCache) Get(ctx context.Context, importPath string, version string, f
 	}
 
 	if OptsFromContext(ctx).Upgrade {
-		version = "latest"
+		version = "upgrade"
 	}
 
 	if version == "" {
@@ -137,21 +140,40 @@ func (c *ModCache) repoRoot(ctx context.Context, importPath string) (string, err
 		return "", errors.Wrapf(err, "resolve `%s` failed", importPath)
 	}
 
-	c.SetModuleVersion(r.Root, "")
+	repo := r.Root
 
-	return r.Root, nil
+	// try resolve sub modules
+	if importPath != repo {
+		d := importPath
+
+		for d != repo {
+			if mod, err := c.download(d, "upgrade"); err == nil {
+				repo = mod.Module
+				break
+			}
+
+			d = filepath.Join(d, "../")
+		}
+	}
+
+	c.SetModuleVersion(repo, "")
+
+	return repo, nil
 }
 
 func paths(path string) []string {
-	parts := strings.Split(path, "/")
+	paths := make([]string, 0)
 
-	paths := make([]string, len(parts))
+	d := path
 
-	prefix := ""
+	for {
+		paths = append(paths, d)
 
-	for i, p := range parts {
-		paths[i] = prefix + p
-		prefix = paths[i] + "/"
+		if !strings.Contains(d, "/") {
+			break
+		}
+
+		d = filepath.Join(d, "../")
 	}
 
 	return paths
