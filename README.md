@@ -58,6 +58,7 @@ jmod get github.com/grafana/jsonnet-libs@latest
   // only support dir
   replace: {
     // version lock
+    // if path equals, could short as '@v0.0.18'
     'github.com/rancher/local-path-provisioner': 'github.com/rancher/local-path-provisioner@v0.0.18',
     // local mod replace
     'github.com/x/a': '../a',
@@ -78,17 +79,32 @@ jmod get github.com/grafana/jsonnet-libs@latest
 }
 ```
 
-## Work with Tanka
+### Known issues
+
+#### dep incompatible go mod repo
+
+For some go project like 
 
 ```
-jmod build -o ./environments/demo/main.jsonnet ./path/to/tanka-environment.jsonnet
-tk show ./environments/demo
+$ go mod download -json github.com/grafana/loki@v2.1.0
+{
+        "Path": "github.com/grafana/loki",
+        "Version": "v2.1.0",
+        "Error": "github.com/grafana/loki@v2.1.0: invalid version: module contains a go.mod file, so major version must be compatible: should be v0 or v1, not v2"
+}
 ```
 
-export not support pipe now, so need to create inline env object main.jsonnet first.
+Could config `mod.jsonnet` replace with commit hash of the tag to hack
 
+```jsonnet
+{
+    replace: {
+        'github.com/grafana/loki': '@1b79df3',
+    }
+}
+```
 
-### Plugin kube
+## Plugin kube
 
 Like Tanka but without struct limit.
 Only one requirement, make sure the file return [`tanka.dev/Environment` object](https://tanka.dev/inline-environments#converting-to-an-inline-environment)
@@ -100,3 +116,12 @@ jmod k apply ./clusters/demo/hello-world.jsonnet
 jmod k delete ./clusters/demo/hello-world.jsonnet
 jmod k prune ./clusters/demo/hello-world.jsonnet
 ```
+
+### Work with Tanka
+
+```
+jmod build -o ./environments/demo/main.jsonnet ./path/to/tanka-environment.jsonnet
+tk show ./environments/demo
+```
+
+export not support pipe now, so need to create inline env object main.jsonnet first.
