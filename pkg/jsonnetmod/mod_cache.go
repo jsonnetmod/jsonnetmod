@@ -173,11 +173,16 @@ func (ModCache) download(pkg string, version string) (*Mod, error) {
 	info := &struct {
 		Path    string
 		Version string
-		Dir     string
-		Sum     string
+		Error   string `json:",omitempty"`
+		Dir     string `json:",omitempty"`
+		Sum     string `json:",omitempty"`
 	}{}
 	if err := json.NewDecoder(buf).Decode(info); err != nil {
 		return nil, err
+	}
+
+	if info.Error != "" {
+		return nil, errors.New(info.Error)
 	}
 
 	mod := &Mod{}
