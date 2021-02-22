@@ -43,12 +43,24 @@ func cmdKubeShow() *cobra.Command {
 			return fmt.Errorf("missing input")
 		}
 
-		lr, err := load(cmd.Context(), args[0])
-		if err != nil {
-			return err
+		show := func(input string) error {
+			lr, err := load(cmd.Context(), input)
+			if err != nil {
+				return err
+			}
+			return lr.Show(opts)
 		}
 
-		return lr.Show(opts)
+		if opts.Output != "" {
+			for _, arg := range args {
+				if err := show(arg); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
+		return show(args[0])
 	})
 }
 
