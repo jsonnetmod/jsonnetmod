@@ -1,9 +1,33 @@
-package jsonnetmod
+package modfile
 
 import (
 	"fmt"
 	"strings"
 )
+
+const ModFilename = "mod.jsonnet"
+
+type ModFile struct {
+	// Module name
+	Module string
+	// JPath JSONNET_PATH
+	// when not empty, symlinks will be created for JSONNET_PATH
+	JPath string
+	// Replace
+	// version limit
+	Replace map[PathIdentity]PathIdentity
+	// Require same as go root
+	// require { module: version }
+	// indirect require { module:: version }
+	Require map[string]Require
+	// Comments
+	Comments map[string][]string
+}
+
+type Require struct {
+	Version  string
+	Indirect bool `json:",omitempty"`
+}
 
 func ParsePathIdentity(v string) (*PathIdentity, error) {
 	if len(v) == 0 {

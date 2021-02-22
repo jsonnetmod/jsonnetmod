@@ -12,6 +12,7 @@ require (
 	github.com/google/go-jsonnet v0.17.0
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/grafana/tanka v0.14.0
+	github.com/jsonnet-bundler/jsonnet-bundler v0.4.0
 	github.com/mitchellh/copystructure v1.1.1 // indirect
 	github.com/onsi/gomega v1.7.0
 	github.com/pkg/errors v0.9.1

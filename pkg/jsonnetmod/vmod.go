@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
+
 	"github.com/google/go-jsonnet"
 	"github.com/octohelm/jsonnetmod/pkg/util"
 )
@@ -21,13 +23,15 @@ func VModFor(root string) *VMod {
 		root = filepath.Join(cwd, root)
 	}
 
-	mod, err := ModFromDir(root)
-	if err != nil {
+	mod := &Mod{}
+	mod.Dir = root
+
+	if _, err := mod.LoadInfo(); err != nil {
 		panic(err)
 	}
 
 	vm.Mod = mod
-	vm.cache.Set(mod)
+	vm.cache.Collect(context.Background(), mod)
 
 	return vm
 }
@@ -63,10 +67,10 @@ func (v *VMod) ListJsonnet(fromPath string) ([]string, error) {
 		}
 
 		if info.IsDir() {
-			if _, err := os.Stat(filepath.Join(path, modJsonnetFile)); err == nil {
+			if _, err := os.Stat(filepath.Join(path, modfile.ModFilename)); err == nil {
 				return filepath.SkipDir
 			}
-			// skip sub root
+			// skip sub repoRoot
 			return nil
 		}
 
@@ -109,20 +113,20 @@ func (v *VMod) Resolve(ctx context.Context, importPath string, importedFrom stri
 func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
 	version := p.Version
 
-	if ver := v.cache.ModuleVersion(p.Module); ver != "" {
+	if ver := v.cache.RepoVersion(p.Repo); ver != "" {
 		version = ver
 	}
 
-	v.SetRequire(p.Module, version, indirect)
+	v.SetRequire(p.Repo, version, indirect)
 
 	if v.JPath != "" {
-		if err := util.Symlink(p.Dir, filepath.Join(v.Dir, v.JPath, p.Module)); err != nil {
+		if err := util.Symlink(p.Dir, filepath.Join(v.Dir, v.JPath, p.Repo)); err != nil {
 			return err
 		}
 
 		for from, to := range v.cache.replace {
 			if from.Path != to.Path && to.Path[0] != '.' {
-				if isSubDirFor(to.Path, p.Module) {
+				if isSubDirFor(to.Path, p.Repo) {
 					if err := util.Symlink(
 						path.Join(p.Dir, p.SubPath),
 						filepath.Join(v.Dir, v.JPath, from.Path),
@@ -137,7 +141,7 @@ func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
 		_ = util.WriteFile(path.Join(p.Dir, v.JPath, "k.libsonnet"), []byte(`import "k/main.libsonnet"`))
 	}
 
-	return WriteMod(v.Mod)
+	return modfile.WriteModFile(v.Dir, &v.ModFile)
 }
 
 func (v *VMod) autoImport(ctx context.Context, fromPath string) error {
