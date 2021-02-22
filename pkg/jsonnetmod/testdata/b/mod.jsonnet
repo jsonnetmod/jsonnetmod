@@ -2,8 +2,11 @@
   module: 'github.com/x/b',
   jpath: './vendor',
   replace: {
+    // doc-util
+    // xxx
     'doc-util': 'github.com/jsonnet-libs/docsonnet/doc-util',
-    'github.com/rancher/local-path-provisioner': 'github.com/rancher/local-path-provisioner@v0.0.18',
+    // using v0.0.18
+    'github.com/rancher/local-path-provisioner': '@v0.0.18',
     'github.com/x/a': '../a',
     k: 'github.com/jsonnet-libs/k8s-alpha/1.18',
     'ksonnet-util': 'github.com/grafana/jsonnet-libs/ksonnet-util',

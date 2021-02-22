@@ -18,22 +18,22 @@ import (
 func NewModCache() *ModCache {
 	return &ModCache{
 		mods:           map[string]*Mod{},
-		replace:        map[PathReplace]PathReplace{},
+		replace:        map[PathIdentity]PathIdentity{},
 		moduleVersions: map[string]string{},
 	}
 }
 
 type ModCache struct {
-	replace map[PathReplace]PathReplace
+	replace map[PathIdentity]PathIdentity
 	// { [<module>@<version>]: *Mod }
 	mods map[string]*Mod
 	// { [<module>]:latest-version }
 	moduleVersions map[string]string
 }
 
-func (c *ModCache) LookupReplace(importPath string, version string) (matched PathReplace, replace PathReplace, exists bool) {
+func (c *ModCache) LookupReplace(importPath string, version string) (matched PathIdentity, replace PathIdentity, exists bool) {
 	for _, path := range paths(importPath) {
-		for _, p := range []PathReplace{
+		for _, p := range []PathIdentity{
 			{Path: path, Version: ""},
 			{Path: path, Version: "latest"},
 			{Path: path, Version: version},
@@ -44,7 +44,7 @@ func (c *ModCache) LookupReplace(importPath string, version string) (matched Pat
 		}
 	}
 
-	return PathReplace{}, PathReplace{}, false
+	return PathIdentity{}, PathIdentity{}, false
 }
 
 func (c *ModCache) Set(mod *Mod) {

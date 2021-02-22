@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func ParsePathIdentity(v string) (*PathReplace, error) {
+func ParsePathIdentity(v string) (*PathIdentity, error) {
 	if len(v) == 0 {
 		return nil, fmt.Errorf("invalid %s", v)
 	}
@@ -14,23 +14,23 @@ func ParsePathIdentity(v string) (*PathReplace, error) {
 
 	i := parts[0]
 
-	if i[0] == '.' {
-		return &PathReplace{Path: i}, nil
+	if i != "" && i[0] == '.' {
+		return &PathIdentity{Path: i}, nil
 	}
 
 	if len(parts) > 1 {
-		return &PathReplace{Path: i, Version: parts[1]}, nil
+		return &PathIdentity{Path: i, Version: parts[1]}, nil
 	}
-	return &PathReplace{Path: i}, nil
+	return &PathIdentity{Path: i}, nil
 
 }
 
-type PathReplace struct {
+type PathIdentity struct {
 	Version string
 	Path    string
 }
 
-func (r *PathReplace) UnmarshalText(text []byte) error {
+func (r *PathIdentity) UnmarshalText(text []byte) error {
 	rp, err := ParsePathIdentity(string(text))
 	if err != nil {
 		return err
@@ -39,15 +39,15 @@ func (r *PathReplace) UnmarshalText(text []byte) error {
 	return nil
 }
 
-func (r PathReplace) MarshalText() (text []byte, err error) {
+func (r PathIdentity) MarshalText() (text []byte, err error) {
 	return []byte(r.String()), nil
 }
 
-func (r PathReplace) IsLocalReplace() bool {
+func (r PathIdentity) IsLocalReplace() bool {
 	return len(r.Path) > 0 && r.Path[0] == '.'
 }
 
-func (r PathReplace) String() string {
+func (r PathIdentity) String() string {
 	if r.IsLocalReplace() {
 		return r.Path
 	}

@@ -3,13 +3,14 @@ package jsonnetmod
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
+
+	"github.com/google/go-jsonnet/ast"
 
 	"github.com/pkg/errors"
 
@@ -38,8 +39,12 @@ func ModFromDir(dir string) (*Mod, error) {
 func LoadModInfo(m *Mod) error {
 	f := filepath.Join(m.Dir, modJsonnetFile)
 
+	if m.Comments == nil {
+		m.Comments = map[string][]string{}
+	}
+
 	if m.Replace == nil {
-		m.Replace = map[PathReplace]PathReplace{}
+		m.Replace = map[PathIdentity]PathIdentity{}
 	}
 
 	if m.Require == nil {
@@ -51,24 +56,109 @@ func LoadModInfo(m *Mod) error {
 			return err
 		}
 	} else {
-		vm := jsonnet.MakeVM()
-
-		jsonRaw, err := vm.EvaluateAnonymousSnippet(f, fmt.Sprintf(`
-local d = (%s);
-local convertRequire = function (o = {}) { [pkg]: { Version: o[pkg], Indirect: !std.objectHas(o, pkg) } for pkg in std.objectFieldsAll(o) } ;
-
-( if std.objectHas(d, 'module') then { Module: d.module } else {} )
- + ( if std.objectHas(d, 'jpath') then { JPath: d.jpath } else {} )
- + ( if std.objectHas(d, 'replace') then { Replace: d.replace } else {} )
- + ( if std.objectHas(d, 'require') then { Require: convertRequire(d.require) } else {} )
-`, data))
+		node, err := jsonnet.SnippetToAST(f, string(data))
 		if err != nil {
 			return err
 		}
 
-		return json.Unmarshal([]byte(jsonRaw), m)
+		if o, ok := node.(*ast.DesugaredObject); ok {
+			for _, f := range o.Fields {
+				fieldName := f.Name.(*ast.LiteralString).Value
+
+				switch fieldName {
+				case "module":
+					if v, ok := f.Body.(*ast.LiteralString); ok {
+						m.Module = v.Value
+					} else {
+						return fmt.Errorf("%s must be a string value of %s", fieldName, modJsonnetFile)
+					}
+				case "jpath":
+					if v, ok := f.Body.(*ast.LiteralString); ok {
+						m.JPath = v.Value
+					} else {
+						return fmt.Errorf("%s must be a string value of %s", fieldName, modJsonnetFile)
+					}
+				case "replace":
+					if v, ok := f.Body.(*ast.DesugaredObject); ok {
+						if err := rangeField(v, func(name string, value string, hidden bool, f ast.DesugaredObjectField) error {
+							from, err := ParsePathIdentity(name)
+							if err != nil {
+								return nil
+							}
+
+							to, err := ParsePathIdentity(value)
+							if err != nil {
+								return nil
+							}
+
+							if to.Path == "" {
+								to.Path = from.Path
+							}
+
+							m.Replace[*from] = *to
+							m.Comments["replace:"+name] = pickNodeComponents(f.Name)
+
+							return nil
+						}); err != nil {
+							return err
+						}
+					} else {
+						return fmt.Errorf("%s must be a object of %s", fieldName, modJsonnetFile)
+					}
+				case "require":
+					if v, ok := f.Body.(*ast.DesugaredObject); ok {
+						if err := rangeField(v, func(name string, value string, hidden bool, f ast.DesugaredObjectField) error {
+							m.Require[name] = Require{
+								Version:  value,
+								Indirect: hidden,
+							}
+							m.Comments["require:"+name] = pickNodeComponents(f.Name)
+							return nil
+						}); err != nil {
+							return err
+						}
+					} else {
+						return fmt.Errorf("%s must be a object of %s", fieldName, modJsonnetFile)
+					}
+				}
+			}
+		} else {
+			return fmt.Errorf("invalid %s", modJsonnetFile)
+		}
+
+		return nil
 	}
 
+	return nil
+}
+
+func pickNodeComponents(node ast.Node) []string {
+	comments := make([]string, 0)
+
+	if f := node.OpenFodder(); f != nil {
+		for _, fe := range *f {
+			comments = append(comments, fe.Comment...)
+		}
+	}
+
+	return comments
+}
+
+func rangeField(o *ast.DesugaredObject, each func(name string, value string, hidden bool, f ast.DesugaredObjectField) error) error {
+	for _, f := range o.Fields {
+		key, ok := f.Name.(*ast.LiteralString)
+		if !ok {
+			return fmt.Errorf("%s should be a string", f.Name)
+		}
+
+		value, ok := f.Body.(*ast.LiteralString)
+		if !ok {
+			return fmt.Errorf("%s should be a string", f.Body)
+		}
+		if err := each(key.Value, value.Value, f.Hide == ast.ObjectFieldHidden, f); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -87,9 +177,31 @@ func WriteMod(m *Mod) error {
 		if len(m.Replace) > 0 {
 			_, _ = fmt.Fprintf(buf, "replace: ")
 
-			data, _ := json.MarshalIndent(m.Replace, "", "  ")
+			writeBlock(buf, func() {
+				replaces := make([]string, 0)
+				for r := range m.Replace {
+					replaces = append(replaces, r.String())
+				}
+				sort.Strings(replaces)
 
-			_, _ = fmt.Fprintf(buf, "%s,\n", data)
+				for _, f := range replaces {
+					from, _ := ParsePathIdentity(f)
+
+					if comments, ok := m.Comments["replace:"+from.String()]; ok {
+						for _, c := range comments {
+							_, _ = fmt.Fprintln(buf, c)
+						}
+					}
+
+					to := m.Replace[*from]
+
+					if to.Path == from.Path {
+						to.Path = ""
+					}
+
+					_, _ = fmt.Fprintf(buf, "'%s': '%s',\n", from, to)
+				}
+			}, false)
 		}
 
 		if len(m.Require) > 0 {
@@ -104,17 +216,22 @@ func WriteMod(m *Mod) error {
 
 				for _, pkg := range pkgs {
 					r := m.Require[pkg]
+
+					if comments, ok := m.Comments["require:"+pkg]; ok {
+						for _, c := range comments {
+							_, _ = fmt.Fprintln(buf, c)
+						}
+					}
+
 					if r.Indirect {
 						_, _ = fmt.Fprintf(buf, "'%s':: '%s',\n", pkg, r.Version)
 					} else {
 						_, _ = fmt.Fprintf(buf, "'%s': '%s',\n", pkg, r.Version)
 					}
 				}
-			})
-
-			_, _ = fmt.Fprintf(buf, ",\n")
+			}, false)
 		}
-	})
+	}, true)
 
 	d, err := formatter.Format(f, buf.String(), formatter.DefaultOptions())
 	if err != nil {
@@ -123,53 +240,38 @@ func WriteMod(m *Mod) error {
 	return ioutil.WriteFile(f, []byte(d), os.ModePerm)
 }
 
-func writeBlock(buf io.Writer, next func()) {
+func writeBlock(buf io.Writer, next func(), root bool) {
 	_, _ = fmt.Fprintln(buf, "{")
 	next()
-	_, _ = fmt.Fprintln(buf, "}")
+	_, _ = fmt.Fprintf(buf, "}")
+	if !root {
+		_, _ = fmt.Fprint(buf, ",")
+	}
+	_, _ = fmt.Fprintln(buf, "")
 }
 
 type Mod struct {
 	// Module name
-	Module string `json:",omitempty"`
+	Module string
 	// JPath JSONNET_PATH
 	// when not empty, symlinks will be created for JSONNET_PATH
-	JPath string `json:",omitempty"`
+	JPath string
 	// Replace
 	// version limit
-	Replace map[PathReplace]PathReplace `json:",omitempty"`
+	Replace map[PathIdentity]PathIdentity
 	// Require same as go root
 	// require { module: version }
 	// indirect require { module:: version }
-	Require map[string]Require `json:",omitempty"`
+	Require map[string]Require
 
 	// Version
-	Version string `json:"-"`
+	Version string
 	// Dir
-	Dir string `json:"-"`
+	Dir string
 	// Sum
-	Sum string `json:"-"`
-}
+	Sum string
 
-func (m *Mod) Clone() *Mod {
-	mod := &Mod{}
-	mod.Dir = m.Dir
-	mod.Version = m.Version
-	mod.Sum = m.Sum
-	mod.Module = m.Module
-	mod.JPath = m.JPath
-
-	mod.Replace = map[PathReplace]PathReplace{}
-	for k, v := range m.Replace {
-		mod.Replace[k] = v
-	}
-
-	mod.Require = map[string]Require{}
-	for k, v := range m.Require {
-		mod.Require[k] = v
-	}
-
-	return mod
+	Comments map[string][]string
 }
 
 type Require struct {
