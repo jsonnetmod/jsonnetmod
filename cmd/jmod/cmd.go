@@ -27,16 +27,15 @@ func cmdRoot() *cobra.Command {
 		Version: version.Version,
 	}
 
-	opts := ProjectOpts{
-		Root: ".",
-	}
+	opts := ProjectOpts{Root: "."}
 
 	return setupPersistentPreRun(cmd, &opts, func(cmd *cobra.Command, args []string) error {
 		mod = jsonnetmod.VModFor(opts.Root)
 
 		if opts.Verbose {
-			zlog, _ := zap.NewDevelopment()
-			*zapLog = *zlog
+			zapLog, _ := zap.NewDevelopment()
+			v := log.(zapr.Underlier).GetUnderlying()
+			*v = *zapLog
 		}
 
 		return nil
