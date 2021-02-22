@@ -5,6 +5,18 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.3](https://github.com/octohelm/jsonnetmod/compare/v0.0.2...v0.0.3)
+
+### Bug Fixes
+
+* **fix** mod.jsonnet should support comments ([a976579](https://github.com/octohelm/jsonnetmod/commit/a976579ba9eedfd898dd87e93fc4a523e5b9768c))
+* **fix** should support sub gomodule ([a564e78](https://github.com/octohelm/jsonnetmod/commit/a564e785fbc882b7223d7c778c9f1b3c9acc2fb6))
+* **fix** verbose fix ([5f61b79](https://github.com/octohelm/jsonnetmod/commit/5f61b79d25325cd80e94d8c27b58067ce9ebd91c))
+* **fix** k.show should support multi inputs ([049f441](https://github.com/octohelm/jsonnetmod/commit/049f441f0cbfed1b1a2bdf90b64eabf0ddd10b6f))
+* **fix** should handle go mod download error ([c1b3231](https://github.com/octohelm/jsonnetmod/commit/c1b3231f2188362317eeb45976eab181e252a60f))
+
+
+
 # [0.0.2](https://github.com/octohelm/jsonnetmod/compare/v0.0.1...v0.0.2)
 
 ### Bug Fixes
