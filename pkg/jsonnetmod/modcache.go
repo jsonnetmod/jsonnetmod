@@ -93,7 +93,7 @@ func (c *ModCache) SetRepoVersion(module string, version modfile.ModVersion) {
 			c.repoVersions[module] = version
 		} else if versionGreaterThan(version.Version, mv.Version) {
 			c.repoVersions[module] = version
-		} else if version.Version == mv.Version {
+		} else if version.Version == mv.Version && version.TagVersion != "" {
 			// sync tag version
 			mv.TagVersion = version.TagVersion
 			c.repoVersions[module] = mv
