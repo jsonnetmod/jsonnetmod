@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
-
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 
@@ -30,7 +28,7 @@ func TestVendorMod(t *testing.T) {
 			err := a.Get(ctx, ".")
 			NewWithT(t).Expect(err).To(BeNil())
 
-			NewWithT(t).Expect(a.Mod.Require["github.com/rancher/local-path-provisioner"]).To(Equal(modfile.Require{Version: "v0.0.19"}))
+			NewWithT(t).Expect(a.Mod.Require["github.com/rancher/local-path-provisioner"].Version).To(Equal("v0.0.19"))
 			NewWithT(t).Expect(VendorSymlink(a.Mod, "github.com/rancher/local-path-provisioner")).To(HaveSuffix("github.com/rancher/local-path-provisioner@v0.0.19"))
 
 		})
@@ -44,7 +42,8 @@ func TestVendorMod(t *testing.T) {
 			err := b.Get(ctx, ".")
 			NewWithT(t).Expect(err).To(BeNil())
 
-			NewWithT(t).Expect(b.Mod.Require["github.com/rancher/local-path-provisioner"]).To(Equal(modfile.Require{Version: "v0.0.19", Indirect: true}))
+			NewWithT(t).Expect(b.Mod.Require["github.com/rancher/local-path-provisioner"].Version).To(Equal("v0.0.19"))
+			NewWithT(t).Expect(b.Mod.Require["github.com/rancher/local-path-provisioner"].Indirect).To(Equal(true))
 			NewWithT(t).Expect(VendorSymlink(b.Mod, "github.com/rancher/local-path-provisioner")).To(HaveSuffix("github.com/rancher/local-path-provisioner@v0.0.18"))
 		})
 
@@ -52,7 +51,8 @@ func TestVendorMod(t *testing.T) {
 			err := b.Get(WithOpts(ctx, OptUpgrade(true)), ".")
 			NewWithT(t).Expect(err).To(BeNil())
 
-			NewWithT(t).Expect(b.Mod.Require["github.com/rancher/local-path-provisioner"]).To(Equal(modfile.Require{Version: "v0.0.19", Indirect: true}))
+			NewWithT(t).Expect(b.Mod.Require["github.com/rancher/local-path-provisioner"].Version).To(Equal("v0.0.19"))
+			NewWithT(t).Expect(b.Mod.Require["github.com/rancher/local-path-provisioner"].Indirect).To(Equal(true))
 			NewWithT(t).Expect(VendorSymlink(b.Mod, "github.com/rancher/local-path-provisioner")).To(HaveSuffix("github.com/rancher/local-path-provisioner@v0.0.18"))
 		})
 	})
@@ -65,7 +65,8 @@ func TestVendorMod(t *testing.T) {
 			err := c.Get(ctx, ".")
 			NewWithT(t).Expect(err).To(BeNil())
 
-			NewWithT(t).Expect(c.Mod.Require["github.com/rancher/local-path-provisioner"]).To(Equal(modfile.Require{Version: "v0.0.19", Indirect: true}))
+			NewWithT(t).Expect(c.Mod.Require["github.com/rancher/local-path-provisioner"].Version).To(Equal("v0.0.19"))
+			NewWithT(t).Expect(c.Mod.Require["github.com/rancher/local-path-provisioner"].Indirect).To(Equal(true))
 			NewWithT(t).Expect(VendorSymlink(c.Mod, "github.com/rancher/local-path-provisioner")).To(HaveSuffix("github.com/rancher/local-path-provisioner@v0.0.18"))
 		})
 	})

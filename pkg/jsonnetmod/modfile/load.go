@@ -83,8 +83,8 @@ func LoadModFile(dir string, m *ModFile) (bool, error) {
 					if v, ok := f.Body.(*ast.DesugaredObject); ok {
 						if err := rangeField(v, func(name string, value string, hidden bool, f ast.DesugaredObjectField) error {
 							m.Require[name] = Require{
-								Version:  value,
-								Indirect: hidden,
+								ModVersion: ParseModVersion(value),
+								Indirect:   hidden,
 							}
 							m.Comments["require:"+name] = pickNodeComponents(f.Name)
 							return nil

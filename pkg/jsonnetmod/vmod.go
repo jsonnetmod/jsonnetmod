@@ -111,13 +111,13 @@ func (v *VMod) Resolve(ctx context.Context, importPath string, importedFrom stri
 }
 
 func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
-	version := p.Version
+	modVersion := p.ModVersion
 
-	if ver := v.cache.RepoVersion(p.Repo); ver != "" {
-		version = ver
+	if mv := v.cache.RepoVersion(p.Repo); mv.Version != "" {
+		modVersion = mv
 	}
 
-	v.SetRequire(p.Repo, version, indirect)
+	v.SetRequire(p.Repo, modVersion, indirect)
 
 	if v.JPath != "" {
 		if err := util.Symlink(p.Dir, filepath.Join(v.Dir, v.JPath, p.Repo)); err != nil {

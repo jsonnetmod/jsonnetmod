@@ -10,19 +10,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/tools/go/vcs"
-
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
-
 	"github.com/go-logr/logr"
+	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
 	"github.com/pkg/errors"
+	"golang.org/x/tools/go/vcs"
 )
 
 func NewModCache() *ModCache {
 	return &ModCache{
 		replace:      map[modfile.PathIdentity]pathIdentityWithMod{},
 		mods:         map[string]*Mod{},
-		repoVersions: map[string]string{},
+		repoVersions: map[string]modfile.ModVersion{},
 	}
 }
 
@@ -31,7 +29,7 @@ type ModCache struct {
 	// { [<module>@<version>]: *Mod }
 	mods map[string]*Mod
 	// { [<repo>]:latest-version }
-	repoVersions map[string]string
+	repoVersions map[string]modfile.ModVersion
 }
 
 type pathIdentityWithMod struct {
@@ -39,19 +37,13 @@ type pathIdentityWithMod struct {
 	mod *Mod
 }
 
-func (c *ModCache) LookupReplace(importPath string, version string) (matched modfile.PathIdentity, replace modfile.PathIdentity, exists bool) {
+func (c *ModCache) LookupReplace(importPath string) (matched modfile.PathIdentity, replace modfile.PathIdentity, exists bool) {
 	for _, path := range paths(importPath) {
-		for _, p := range []modfile.PathIdentity{
-			{Path: path, Version: ""},
-			{Path: path, Version: "latest"},
-			{Path: path, Version: version},
-		} {
-			if rp, ok := c.replace[p]; ok {
-				return p, rp.PathIdentity, true
-			}
+		p := modfile.PathIdentity{Path: path}
+		if rp, ok := c.replace[p]; ok {
+			return p, rp.PathIdentity, true
 		}
 	}
-
 	return modfile.PathIdentity{}, modfile.PathIdentity{}, false
 }
 
@@ -64,10 +56,15 @@ func (c *ModCache) Collect(ctx context.Context, mod *Mod) {
 
 	c.mods[id] = mod
 
-	c.SetRepoVersion(mod.Repo, mod.Version)
+	// cached moduel@tag too
+	if mod.TagVersion != "" {
+		c.mods[mod.Module+"@"+mod.TagVersion] = mod
+	}
+
+	c.SetRepoVersion(mod.Repo, mod.ModVersion)
 
 	for repo, r := range mod.Require {
-		c.SetRepoVersion(repo, r.Version)
+		c.SetRepoVersion(repo, r.ModVersion)
 	}
 
 	for k, replaceTarget := range mod.Replace {
@@ -89,23 +86,28 @@ func (c *ModCache) Collect(ctx context.Context, mod *Mod) {
 	}
 }
 
-func (c *ModCache) SetRepoVersion(module string, version string) {
-	if v, ok := c.repoVersions[module]; ok {
-		if v == "" {
+func (c *ModCache) SetRepoVersion(module string, version modfile.ModVersion) {
+	if mv, ok := c.repoVersions[module]; ok {
+		if mv.Version == "" {
 			c.repoVersions[module] = version
-		} else if versionGreaterThan(version, v) {
+		} else if versionGreaterThan(version.Version, mv.Version) {
 			c.repoVersions[module] = version
+		} else if version.Version == mv.Version {
+			// sync tag version
+			mv.TagVersion = version.TagVersion
+			c.repoVersions[module] = mv
 		}
+
 	} else {
 		c.repoVersions[module] = version
 	}
 }
 
-func (c *ModCache) RepoVersion(repo string) (version string) {
+func (c *ModCache) RepoVersion(repo string) modfile.ModVersion {
 	if v, ok := c.repoVersions[repo]; ok {
 		return v
 	}
-	return ""
+	return modfile.ModVersion{}
 }
 
 type VersionFixer = func(repo string, version string) string
@@ -120,69 +122,100 @@ func (c *ModCache) Get(ctx context.Context, importPath string, version string, f
 		version = fixVersion(repo, version)
 	}
 
-	if OptsFromContext(ctx).Upgrade {
-		version = "upgrade"
-	}
+	return c.get(ctx, repo, version, importPath)
+}
 
+const versionUpgrade = "upgrade"
+
+func (c *ModCache) get(ctx context.Context, repo string, version string, importPath string) (*Mod, error) {
 	if version == "" {
-		version = "latest"
+		version = versionUpgrade
 	}
 
-	if version != "upgrade" {
-		if mod, ok := c.mods[repo+"@"+version]; ok {
-			if mod.Resolved() {
-				return mod, nil
+	if OptsFromContext(ctx).Upgrade {
+		version = versionUpgrade
+
+		// when tag version exists, should upgrade with tag version
+		if mv, ok := c.repoVersions[repo]; ok {
+			if mv.TagVersion != "" {
+				version = mv.TagVersion
 			}
 		}
 	}
 
+	// mod@version replace
 	if r, ok := c.replace[modfile.PathIdentity{Path: repo, Version: version}]; ok {
 		repo, version = r.Path, r.Version
 	}
 
-	return c.get(ctx, repo, version, importPath)
-}
-
-func (c *ModCache) get(ctx context.Context, module string, version string, importPath string) (*Mod, error) {
-	logr.FromContextOrDiscard(ctx).V(1).Info(fmt.Sprintf("get %s@%s", module, version))
-
-	root, err := c.download(module, version)
-	if err != nil {
-		return nil, err
+	if version == "" {
+		version = versionUpgrade
 	}
 
-	// sub dir may as mod.
-	importPaths := paths(importPath)
+	var root *Mod
 
-	c.Collect(ctx, root)
+	if mod, ok := c.mods[repo+"@"+version]; ok && mod.Resolved() {
+		root = mod
+	} else {
+		logr.FromContextOrDiscard(ctx).V(1).Info(fmt.Sprintf("get %s@%s", repo, version))
 
-	for _, p := range importPaths {
-		if p == root.Module {
-			break
-		}
-
-		rel, _ := subPath(root.Module, p)
-
-		sub := Mod{}
-		sub.Repo = root.Repo
-		sub.Module = p
-		sub.Version = root.Version
-		sub.Sum = root.Sum
-
-		sub.Dir = filepath.Join(root.Dir, rel)
-
-		ok, err := sub.LoadInfo()
+		m, err := c.download(repo, version)
 		if err != nil {
-			// if dir contains go.mod, will be empty
-			if os.IsNotExist(errors.Unwrap(err)); err != nil {
-				return c.get(ctx, sub.Module, version, importPath)
-			}
 			return nil, err
 		}
 
-		if ok {
-			c.Collect(ctx, &sub)
-			return &sub, nil
+		if version != versionUpgrade {
+			m.TagVersion = version
+		}
+
+		root = m
+
+		if _, err := root.LoadInfo(); err != nil {
+			return nil, err
+		}
+
+		c.Collect(ctx, root)
+	}
+
+	if root != nil {
+
+		// sub dir may as mod.
+		importPaths := paths(importPath)
+
+		for _, module := range importPaths {
+			if module == root.Module {
+				break
+			}
+
+			if mod, ok := c.mods[module+"@"+version]; ok && mod.Resolved() {
+				return mod, nil
+			} else {
+				rel, _ := subPath(root.Module, module)
+
+				sub := Mod{}
+				sub.Repo = root.Repo
+				sub.RepoSum = root.RepoSum
+
+				sub.Module = module
+				sub.ModVersion = root.ModVersion
+
+				sub.Dir = filepath.Join(root.Dir, rel)
+
+				ok, err := sub.LoadInfo()
+				if err != nil {
+					// if dir contains go.mod, will be empty
+					if os.IsNotExist(errors.Unwrap(err)); err != nil {
+						return c.get(ctx, sub.Module, version, importPath)
+					}
+
+					return nil, err
+				}
+
+				if ok {
+					c.Collect(ctx, &sub)
+					return &sub, nil
+				}
+			}
 		}
 	}
 
@@ -205,7 +238,7 @@ func (c *ModCache) repoRoot(ctx context.Context, importPath string) (string, err
 		return "", errors.Wrapf(err, "resolve `%s` failed", importPath)
 	}
 
-	c.SetRepoVersion(r.Root, "")
+	c.SetRepoVersion(r.Root, modfile.ModVersion{})
 
 	return r.Root, nil
 }
@@ -262,7 +295,7 @@ func (ModCache) download(pkg string, version string) (*Mod, error) {
 	mod.Repo = info.Path
 	mod.Version = info.Version
 	mod.Dir = info.Dir
-	mod.Sum = info.Sum
+	mod.RepoSum = info.Sum
 
 	return mod, nil
 }

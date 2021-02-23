@@ -13,21 +13,19 @@ import (
 
 type Mod struct {
 	modfile.ModFile
+	modfile.ModVersion
 	// Repo
 	Repo string
-	// Version
-	Version string
+	// RepoSum
+	RepoSum string
 	// Dir
 	Dir string
-	// Sum
-	Sum string
 }
 
 func (m *Mod) String() string {
 	if m.Version == "" {
-		return m.Module + "@latest"
+		return m.Module + "@v0.0.0"
 	}
-
 	return m.Module + "@" + m.Version
 }
 
@@ -61,7 +59,7 @@ func (m *Mod) Resolved() bool {
 	return m.Dir != ""
 }
 
-func (m *Mod) SetRequire(module string, version string, indirect bool) {
+func (m *Mod) SetRequire(module string, modVersion modfile.ModVersion, indirect bool) {
 	if module == m.Module {
 		return
 	}
@@ -70,12 +68,14 @@ func (m *Mod) SetRequire(module string, version string, indirect bool) {
 		m.Require = map[string]modfile.Require{}
 	}
 
-	r := modfile.Require{Version: version, Indirect: indirect}
+	r := modfile.Require{}
+	r.ModVersion = modVersion
+	r.Indirect = indirect
 
 	if currentRequire, ok := m.Require[module]; ok {
 		// always using greater one
 		if versionGreaterThan(currentRequire.Version, r.Version) {
-			r.Version = currentRequire.Version
+			r.ModVersion = currentRequire.ModVersion
 		}
 
 		if r.Indirect {
@@ -92,10 +92,11 @@ func (m *Mod) ResolveImportPath(ctx context.Context, cache *ModCache, importPath
 		return ImportPathFor(m, importPath), nil
 	}
 
-	if matched, replace, ok := cache.LookupReplace(importPath, version); ok {
+	if matched, replace, ok := cache.LookupReplace(importPath); ok {
 		// xxx => ../xxx
 		if replace.IsLocalReplace() {
 			mod := &Mod{Dir: filepath.Join(m.Dir, replace.Path)}
+			mod.Version = "v0.0.0"
 			if _, err := mod.LoadInfo(); err != nil {
 				return nil, err
 			}

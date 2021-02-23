@@ -24,8 +24,37 @@ type ModFile struct {
 	Comments map[string][]string
 }
 
+// v0.0.0,v
+func ParseModVersion(v string) ModVersion {
+	mv := ModVersion{}
+
+	versions := strings.Split(v, ",")
+
+	mv.Version = versions[0]
+
+	if len(versions) > 1 {
+		mv.TagVersion = versions[1]
+	} else {
+		mv.TagVersion = mv.Version
+	}
+
+	return mv
+}
+
+type ModVersion struct {
+	Version    string
+	TagVersion string
+}
+
+func (mv ModVersion) String() string {
+	if mv.TagVersion == "" || mv.Version == mv.TagVersion {
+		return mv.Version
+	}
+	return mv.Version + "," + mv.TagVersion
+}
+
 type Require struct {
-	Version  string
+	ModVersion
 	Indirect bool `json:",omitempty"`
 }
 

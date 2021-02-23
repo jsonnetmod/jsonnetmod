@@ -74,9 +74,9 @@ func WriteModFile(dir string, m *ModFile) error {
 					}
 
 					if r.Indirect {
-						_, _ = fmt.Fprintf(buf, "'%s':: '%s',\n", pkg, r.Version)
+						_, _ = fmt.Fprintf(buf, "'%s':: '%s',\n", pkg, r.ModVersion)
 					} else {
-						_, _ = fmt.Fprintf(buf, "'%s': '%s',\n", pkg, r.Version)
+						_, _ = fmt.Fprintf(buf, "'%s': '%s',\n", pkg, r.ModVersion)
 					}
 				}
 			}, false)
