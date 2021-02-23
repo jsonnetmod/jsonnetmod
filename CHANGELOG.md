@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.5](https://github.com/octohelm/jsonnetmod/compare/v0.0.4...v0.0.5)
+
+### Bug Fixes
+
+* **fix** require version may with tag version if needs ([1cf0ba7](https://github.com/octohelm/jsonnetmod/commit/1cf0ba7aa40dc22628e608b9f4cf4bcc07b8864b))
+
+
+
 # [0.0.4](https://github.com/octohelm/jsonnetmod/compare/v0.0.3...v0.0.4)
 
 ### Bug Fixes
