@@ -5,6 +5,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.7](https://github.com/octohelm/jsonnetmod/compare/v0.0.6...v0.0.7)
+
+### Bug Fixes
+
+* **fix(kube):** jmod k should support --target for filter ([b326d92](https://github.com/octohelm/jsonnetmod/commit/b326d92f969d117c77693f440fd380874d8e60fa))
+* **fix** tag version should only overwrite when exixts ([0cc42eb](https://github.com/octohelm/jsonnetmod/commit/0cc42ebb2477700c9e81346c84740322c8b00d3b))
+
+
+
 # [0.0.6](https://github.com/octohelm/jsonnetmod/compare/v0.0.5...v0.0.6)
 
 ### Bug Fixes
