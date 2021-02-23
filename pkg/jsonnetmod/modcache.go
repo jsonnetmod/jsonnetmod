@@ -74,8 +74,9 @@ func (c *ModCache) Collect(ctx context.Context, mod *Mod) {
 			if replaceTarget.String() != currentReplaceTarget.PathIdentity.String() {
 				fmt.Printf(`
 [WARNING] '%s' already replaced to 
-	'%s' (using by module '%s'), but another module want to replace
+	'%s' (using by module '%s'), but another module want to replace as 
 	'%s' (requested by module %s)
+
 `,
 					k,
 					currentReplaceTarget.PathIdentity, currentReplaceTarget.mod,
@@ -127,7 +128,9 @@ func (c *ModCache) Get(ctx context.Context, importPath string, version string, f
 
 const versionUpgrade = "upgrade"
 
-func (c *ModCache) get(ctx context.Context, repo string, version string, importPath string) (*Mod, error) {
+func (c *ModCache) get(ctx context.Context, repo string, requestedVersion string, importPath string) (*Mod, error) {
+	version := requestedVersion
+
 	if version == "" {
 		version = versionUpgrade
 	}
@@ -139,6 +142,13 @@ func (c *ModCache) get(ctx context.Context, repo string, version string, importP
 		if mv, ok := c.repoVersions[repo]; ok {
 			if mv.TagVersion != "" {
 				version = mv.TagVersion
+			}
+		}
+	} else {
+		// use the resolved version, when already resolved.
+		if mv, ok := c.repoVersions[repo]; ok {
+			if mv.TagVersion != "" && mv.Version != "" && mv.TagVersion == requestedVersion {
+				version = mv.Version
 			}
 		}
 	}
@@ -165,7 +175,7 @@ func (c *ModCache) get(ctx context.Context, repo string, version string, importP
 		}
 
 		if version != versionUpgrade {
-			m.TagVersion = version
+			m.TagVersion = requestedVersion
 		}
 
 		root = m
