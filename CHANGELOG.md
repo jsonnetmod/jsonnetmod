@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.6](https://github.com/octohelm/jsonnetmod/compare/v0.0.5...v0.0.6)
+
+### Bug Fixes
+
+* **fix** should use the resolved version for special vcs ref ([8bc8a55](https://github.com/octohelm/jsonnetmod/commit/8bc8a55008ddbe7bc8eb74285d51274c37e740fa))
+
+
+
 # [0.0.5](https://github.com/octohelm/jsonnetmod/compare/v0.0.4...v0.0.5)
 
 ### Bug Fixes
