@@ -38,6 +38,8 @@ jmod get github.com/grafana/jsonnet-libs@latest
     * all dependency codes will download under `$(go env GOMODCACHE)`
     * `GOPROXY` supported to speed up downloading
     * `JSONNET_PATH` compatibility
+* Compatible with `jsonnetfile.json`
+    * not support local source, use `replace` to fix 
 * Includes all [native functions of tanka](https://tanka.dev/jsonnet/native)
 * Object YAML import supported
     * with hidden fields `__dirname` and `__filename`
@@ -73,8 +75,9 @@ jmod get github.com/grafana/jsonnet-libs@latest
   // :: hidden fields means indirect require
   require: {
     'github.com/rancher/local-path-provisioner':: 'v0.0.19',
-    'github.com/grafana/jsonnet-libs':: 'v0.0.0-20210209092858-49e80898b183',
-    'github.com/x/a': 'latest',
+    // ,<tag_version>, when upgrade, should use tag version for upgrade. 
+    'github.com/grafana/jsonnet-libs':: 'v0.0.0-20210209092858-49e80898b183,master',
+    'github.com/x/a': 'v0.0.0',
   },
 }
 ```
