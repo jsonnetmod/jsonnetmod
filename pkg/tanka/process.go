@@ -14,6 +14,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type FilterOpts struct {
+	Targets []string `name:"target,t"  usage:"Regex filter on '<kind>/<name>'. See https://tanka.dev/output-filtering"`
+}
+
 func Process(data []byte, filters process.Matchers) (*LoadResult, error) {
 	env := &v1alpha1.Environment{}
 

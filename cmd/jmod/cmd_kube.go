@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/tanka/pkg/jsonnet/native"
+	"github.com/grafana/tanka/pkg/process"
 	"github.com/octohelm/jsonnetmod/pkg/tanka"
 	"github.com/spf13/cobra"
 )
@@ -21,17 +22,23 @@ func cmdKube() *cobra.Command {
 		Aliases: []string{"k"},
 	}
 
+	filters := &tanka.FilterOpts{
+		Targets: []string{},
+	}
+
+	bindFlags(cmd.PersistentFlags(), filters)
+
 	cmd.AddCommand(
-		cmdKubeApply(),
-		cmdKubeShow(),
-		cmdKubeDelete(),
-		cmdKubePrune(),
+		cmdKubeApply(filters),
+		cmdKubeShow(filters),
+		cmdKubeDelete(filters),
+		cmdKubePrune(filters),
 	)
 
 	return cmd
 }
 
-func cmdKubeShow() *cobra.Command {
+func cmdKubeShow(filters *tanka.FilterOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "show <input>",
 	}
@@ -44,7 +51,7 @@ func cmdKubeShow() *cobra.Command {
 		}
 
 		show := func(input string) error {
-			lr, err := load(cmd.Context(), input)
+			lr, err := load(cmd.Context(), input, filters)
 			if err != nil {
 				return err
 			}
@@ -64,7 +71,7 @@ func cmdKubeShow() *cobra.Command {
 	})
 }
 
-func cmdKubeApply() *cobra.Command {
+func cmdKubeApply(filters *tanka.FilterOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "apply <input>",
 	}
@@ -78,7 +85,7 @@ func cmdKubeApply() *cobra.Command {
 			return fmt.Errorf("missing input")
 		}
 
-		lr, err := load(cmd.Context(), args[0])
+		lr, err := load(cmd.Context(), args[0], filters)
 		if err != nil {
 			return err
 		}
@@ -87,7 +94,7 @@ func cmdKubeApply() *cobra.Command {
 	})
 }
 
-func cmdKubeDelete() *cobra.Command {
+func cmdKubeDelete(filters *tanka.FilterOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "delete <input>",
 	}
@@ -101,7 +108,7 @@ func cmdKubeDelete() *cobra.Command {
 			return fmt.Errorf("missing input")
 		}
 
-		lr, err := load(cmd.Context(), args[0])
+		lr, err := load(cmd.Context(), args[0], filters)
 		if err != nil {
 			return err
 		}
@@ -110,7 +117,7 @@ func cmdKubeDelete() *cobra.Command {
 	})
 }
 
-func cmdKubePrune() *cobra.Command {
+func cmdKubePrune(filters *tanka.FilterOpts) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "prune <input>",
 	}
@@ -122,7 +129,7 @@ func cmdKubePrune() *cobra.Command {
 			return fmt.Errorf("missing input")
 		}
 
-		lr, err := load(cmd.Context(), args[0])
+		lr, err := load(cmd.Context(), args[0], filters)
 		if err != nil {
 			return err
 		}
@@ -131,7 +138,12 @@ func cmdKubePrune() *cobra.Command {
 	})
 }
 
-func load(ctx context.Context, filename string) (*tanka.LoadResult, error) {
+func load(ctx context.Context, filename string, opts *tanka.FilterOpts) (*tanka.LoadResult, error) {
+	filters, err := process.StrExps(opts.Targets...)
+	if err != nil {
+		return nil, err
+	}
+
 	vm := mod.MakeVM(ctx)
 
 	for _, nf := range native.Funcs() {
@@ -143,5 +155,5 @@ func load(ctx context.Context, filename string) (*tanka.LoadResult, error) {
 		return nil, err
 	}
 
-	return tanka.Process([]byte(jsonData), nil)
+	return tanka.Process([]byte(jsonData), filters)
 }
