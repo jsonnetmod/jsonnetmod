@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/go-logr/zapr"
 	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod"
-	"github.com/octohelm/jsonnetmod/pkg/version"
+	"github.com/octohelm/jsonnetmod/version"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
