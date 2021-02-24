@@ -1,7 +1,6 @@
 package jsonnetfile
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -20,7 +19,7 @@ func LoadModFile(dir string, m *modfile.ModFile) (bool, error) {
 		m.Replace = map[modfile.PathIdentity]modfile.PathIdentity{}
 	}
 
-	if data, err := ioutil.ReadFile(f); err != nil {
+	if data, err := os.ReadFile(f); err != nil {
 		if !os.IsNotExist(err) {
 			return false, err
 		}

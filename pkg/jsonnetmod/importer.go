@@ -3,7 +3,6 @@ package jsonnetmod
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -78,7 +77,7 @@ func (i *Importer) load(file string) (jsonnet.Contents, error) {
 		return contents, nil
 	}
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return jsonnet.Contents{}, err
 	}

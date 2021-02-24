@@ -8,7 +8,7 @@
 
 ## Requirements
 
-* go 1.16+ (need `go mod download -json` to download & cache deps)
+* `git` or other vcs tool supported by go for vcs downloading.
 
 ## Install
 

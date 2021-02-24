@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -87,7 +86,7 @@ func WriteModFile(dir string, m *ModFile) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(f, []byte(d), os.ModePerm)
+	return os.WriteFile(f, []byte(d), os.ModePerm)
 }
 
 func writeBlock(buf io.Writer, next func(), root bool) {

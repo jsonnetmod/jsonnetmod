@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/go-logr/logr"
@@ -33,7 +32,7 @@ func FormatFiles(ctx context.Context, files []string, opt FormatOpts) error {
 	for i := range files {
 		file := files[i]
 
-		data, err := ioutil.ReadFile(file)
+		data, err := os.ReadFile(file)
 		if err != nil {
 			return err
 		}

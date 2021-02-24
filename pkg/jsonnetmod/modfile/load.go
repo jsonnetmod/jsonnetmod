@@ -2,7 +2,6 @@ package modfile
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -25,7 +24,7 @@ func LoadModFile(dir string, m *ModFile) (bool, error) {
 		m.Require = map[string]Require{}
 	}
 
-	if data, err := ioutil.ReadFile(f); err != nil {
+	if data, err := os.ReadFile(f); err != nil {
 		if !os.IsNotExist(err) {
 			return false, err
 		}

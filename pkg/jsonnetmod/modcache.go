@@ -1,14 +1,13 @@
 package jsonnetmod
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/octohelm/jsonnetmod/pkg/gomod"
 
 	"github.com/go-logr/logr"
 	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
@@ -169,7 +168,7 @@ func (c *ModCache) get(ctx context.Context, repo string, requestedVersion string
 	} else {
 		logr.FromContextOrDiscard(ctx).V(1).Info(fmt.Sprintf("get %s@%s", repo, version))
 
-		m, err := c.download(repo, version)
+		m, err := c.download(ctx, repo, version)
 		if err != nil {
 			return nil, err
 		}
@@ -271,28 +270,10 @@ func paths(path string) []string {
 	return paths
 }
 
-func (ModCache) download(pkg string, version string) (*Mod, error) {
-	buf := bytes.NewBuffer(nil)
-
-	cmd := exec.Command("go", "mod", "download", "-json", pkg+"@"+version)
-	cmd.Env = os.Environ()
-
-	cmd.Stdout = buf
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		return nil, err
-	}
-
-	info := &struct {
-		Path    string
-		Version string
-		Error   string `json:",omitempty"`
-		Dir     string `json:",omitempty"`
-		Sum     string `json:",omitempty"`
-	}{}
-	if err := json.NewDecoder(buf).Decode(info); err != nil {
-		return nil, err
+func (ModCache) download(ctx context.Context, pkg string, version string) (*Mod, error) {
+	info := gomod.ResolveModule(ctx, pkg, version)
+	if info == nil {
+		return nil, fmt.Errorf("can't found %s@%s", pkg, version)
 	}
 
 	if info.Error != "" {
