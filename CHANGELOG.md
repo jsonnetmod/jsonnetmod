@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.8](https://github.com/octohelm/jsonnetmod/compare/v0.0.7...v0.0.8)
+
+### Bug Fixes
+
+* **fix** cmd/go/internal/modload,modfetch to replace go mod download -json ([6df93a3](https://github.com/octohelm/jsonnetmod/commit/6df93a304cfa5279e8d43a1b20fc600e0ff5f9aa))
+
+
+
 # [0.0.7](https://github.com/octohelm/jsonnetmod/compare/v0.0.6...v0.0.7)
 
 ### Bug Fixes
