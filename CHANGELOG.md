@@ -5,6 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.0.9](https://github.com/jsonnetmod/jsonnetmod/compare/v0.0.8...v0.0.9)
+
+
 # [0.0.8](https://github.com/jsonnetmod/jsonnetmod/compare/v0.0.7...v0.0.8)
 
 ### Bug Fixes
