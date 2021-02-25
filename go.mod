@@ -1,4 +1,4 @@
-module github.com/octohelm/jsonnetmod
+module github.com/jsonnetmod/jsonnetmod
 
 go 1.16
 

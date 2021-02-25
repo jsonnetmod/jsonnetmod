@@ -36,3 +36,9 @@ install: build
 
 dep:
 	go get -u ./...
+
+install.forkinternal:
+	go install github.com/jsonnetmod/tools/cmd/forkinternal@3e67f04
+
+fork: install.forkinternal
+	forkinternal cmd/go/internal/modload cmd/go/internal/modfetch

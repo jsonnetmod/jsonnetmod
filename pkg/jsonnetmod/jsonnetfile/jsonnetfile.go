@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/jsonnet-bundler/jsonnet-bundler/spec/v1"
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod/modfile"
 )
 
 func LoadModFile(dir string, m *modfile.ModFile) (bool, error) {

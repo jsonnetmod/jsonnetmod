@@ -1,7 +1,9 @@
 package main
 
 import (
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod"
+	"context"
+
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod"
 
 	"github.com/spf13/cobra"
 )
@@ -20,11 +22,11 @@ func cmdGet() *cobra.Command {
 
 	o := jsonnetmod.Opts{}
 
-	return setupRun(cmd, &o, func(cmd *cobra.Command, args []string) error {
+	return setupRun(cmd, &o, func(ctx context.Context, args []string) error {
 		importPath := "."
 		if len(args) > 0 {
 			importPath = args[0]
 		}
-		return mod.Get(jsonnetmod.WithOpts(cmd.Context(), jsonnetmod.OptUpgrade(o.Upgrade)), importPath)
+		return mod.Get(jsonnetmod.WithOpts(ctx, jsonnetmod.OptUpgrade(o.Upgrade)), importPath)
 	})
 }

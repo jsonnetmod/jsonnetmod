@@ -6,7 +6,7 @@ import (
 
 	"github.com/grafana/tanka/pkg/jsonnet/native"
 	"github.com/grafana/tanka/pkg/process"
-	"github.com/octohelm/jsonnetmod/pkg/tanka"
+	"github.com/jsonnetmod/jsonnetmod/pkg/tanka"
 	"github.com/spf13/cobra"
 )
 
@@ -45,13 +45,13 @@ func cmdKubeShow(filters *tanka.FilterOpts) *cobra.Command {
 
 	opts := tanka.ShowOpts{}
 
-	return setupRun(cmd, &opts, func(cmd *cobra.Command, args []string) error {
+	return setupRun(cmd, &opts, func(ctx context.Context, args []string) error {
 		if len(args) == 0 {
 			return fmt.Errorf("missing input")
 		}
 
 		show := func(input string) error {
-			lr, err := load(cmd.Context(), input, filters)
+			lr, err := load(ctx, input, filters)
 			if err != nil {
 				return err
 			}
@@ -80,12 +80,12 @@ func cmdKubeApply(filters *tanka.FilterOpts) *cobra.Command {
 		Validate: true,
 	}
 
-	return setupRun(cmd, &opts, func(cmd *cobra.Command, args []string) error {
+	return setupRun(cmd, &opts, func(ctx context.Context, args []string) error {
 		if len(args) == 0 {
 			return fmt.Errorf("missing input")
 		}
 
-		lr, err := load(cmd.Context(), args[0], filters)
+		lr, err := load(ctx, args[0], filters)
 		if err != nil {
 			return err
 		}
@@ -103,12 +103,12 @@ func cmdKubeDelete(filters *tanka.FilterOpts) *cobra.Command {
 		Validate: true,
 	}
 
-	return setupRun(cmd, &opts, func(cmd *cobra.Command, args []string) error {
+	return setupRun(cmd, &opts, func(ctx context.Context, args []string) error {
 		if len(args) == 0 {
 			return fmt.Errorf("missing input")
 		}
 
-		lr, err := load(cmd.Context(), args[0], filters)
+		lr, err := load(ctx, args[0], filters)
 		if err != nil {
 			return err
 		}
@@ -124,12 +124,12 @@ func cmdKubePrune(filters *tanka.FilterOpts) *cobra.Command {
 
 	opts := tanka.PruneOpts{}
 
-	return setupRun(cmd, &opts, func(cmd *cobra.Command, args []string) error {
+	return setupRun(cmd, &opts, func(ctx context.Context, args []string) error {
 		if len(args) == 0 {
 			return fmt.Errorf("missing input")
 		}
 
-		lr, err := load(cmd.Context(), args[0], filters)
+		lr, err := load(ctx, args[0], filters)
 		if err != nil {
 			return err
 		}

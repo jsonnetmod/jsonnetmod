@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
-type runFn = func(cmd *cobra.Command, args []string) error
+type runFn = func(ctx context.Context, args []string) error
 
 func setupRun(cmd *cobra.Command, opts interface{}, fn runFn) *cobra.Command {
 	bindFlags(cmd.Flags(), opts)
@@ -25,7 +28,13 @@ func setupPersistentPreRun(cmd *cobra.Command, opts interface{}, fn runFn) *cobr
 
 func runE(fn runFn) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
-		if err := fn(cmd, args); err != nil {
+		ctx := cmd.Context()
+
+		if projectOptions.Verbose {
+			ctx = jsonnetmod.WithOpts(ctx, jsonnetmod.OptVerbose(true))
+		}
+
+		if err := fn(ctx, args); err != nil {
 			fmt.Println("execute failed: ")
 			fmt.Println(err)
 		}

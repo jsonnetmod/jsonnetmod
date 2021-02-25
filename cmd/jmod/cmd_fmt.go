@@ -1,7 +1,9 @@
 package main
 
 import (
-	"github.com/octohelm/jsonnetmod/pkg/jsonnet"
+	"context"
+
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnet"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +21,7 @@ func cmdFmt() *cobra.Command {
 
 	formatOpts := jsonnet.FormatOpts{}
 
-	return setupRun(cmd, &formatOpts, func(cmd *cobra.Command, args []string) error {
+	return setupRun(cmd, &formatOpts, func(ctx context.Context, args []string) error {
 		baseDir := "./"
 		if len(args) > 0 {
 			baseDir = args[0]

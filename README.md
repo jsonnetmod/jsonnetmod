@@ -1,8 +1,8 @@
 # Jsonnet Mod
 
-[![GoDoc Widget](https://godoc.org/github.com/octohelm/jsonnetmod?status.svg)](https://godoc.org/github.com/octohelm/jsonnetmod)
+[![GoDoc Widget](https://godoc.org/github.com/jsonnetmod/jsonnetmod?status.svg)](https://godoc.org/github.com/jsonnetmod/jsonnetmod)
 [![codecov](https://codecov.io/gh/octohelm/jsonnetmod/branch/master/graph/badge.svg)](https://codecov.io/gh/octohelm/jsonnetmod)
-[![Go Report Card](https://goreportcard.com/badge/github.com/octohelm/jsonnetmod)](https://goreportcard.com/report/github.com/octohelm/jsonnetmod)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jsonnetmod/jsonnetmod)](https://goreportcard.com/report/github.com/jsonnetmod/jsonnetmod)
 
 [JSONNET](https://jsonnet.org/) dependency management based on [go modules](https://golang.org/ref/mod)
 
@@ -13,7 +13,7 @@
 ## Install
 
 ```shell
-go install github.com/octohelm/jsonnetmod/cmd/jmod@latest
+go install github.com/jsonnetmod/jsonnetmod/cmd/jmod@latest
 ```
 
 ## Usage

@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/octohelm/jsonnetmod/pkg/gomod"
+	"github.com/jsonnetmod/jsonnetmod/pkg/gomod"
 
 	"github.com/go-logr/logr"
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod/modfile"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/vcs"
 )
@@ -271,7 +271,7 @@ func paths(path string) []string {
 }
 
 func (ModCache) download(ctx context.Context, pkg string, version string) (*Mod, error) {
-	info := gomod.ResolveModule(ctx, pkg, version)
+	info := gomod.ResolveModule(ctx, pkg, version, OptsFromContext(ctx).Verbose)
 	if info == nil {
 		return nil, fmt.Errorf("can't found %s@%s", pkg, version)
 	}

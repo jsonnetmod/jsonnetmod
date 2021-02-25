@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/octohelm/jsonnetmod/pkg/util"
+	"github.com/jsonnetmod/jsonnetmod/pkg/util"
 	"golang.org/x/term"
 )
 

@@ -4,6 +4,7 @@ import "context"
 
 type Opts struct {
 	Upgrade bool `name:"upgrade,u" usage:"need upgrade dependencies"`
+	Verbose bool `name:"verbose,v" usage:"verbose"`
 }
 
 type OptFn = func(o *Opts)
@@ -11,6 +12,12 @@ type OptFn = func(o *Opts)
 func OptUpgrade(b bool) OptFn {
 	return func(o *Opts) {
 		o.Upgrade = b
+	}
+}
+
+func OptVerbose(v bool) OptFn {
+	return func(o *Opts) {
+		o.Verbose = v
 	}
 }
 

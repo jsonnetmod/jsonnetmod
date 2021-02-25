@@ -1,18 +1,21 @@
 package main
 
 import (
+	"context"
+
 	"github.com/go-logr/zapr"
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod"
-	"github.com/octohelm/jsonnetmod/version"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod"
+	"github.com/jsonnetmod/jsonnetmod/version"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
 var (
-	mod       *jsonnetmod.VMod
-	zapLog, _ = zap.NewDevelopment(zap.WithCaller(false), zap.IncreaseLevel(zap.InfoLevel))
-	log       = zapr.NewLogger(zapLog)
-	rootCmd   = cmdRoot()
+	mod            *jsonnetmod.VMod
+	zapLog, _      = zap.NewDevelopment(zap.WithCaller(false), zap.IncreaseLevel(zap.InfoLevel))
+	log            = zapr.NewLogger(zapLog)
+	projectOptions = ProjectOpts{Root: "."}
+	rootCmd        = cmdRoot()
 )
 
 type ProjectOpts struct {
@@ -27,12 +30,10 @@ func cmdRoot() *cobra.Command {
 		Version: version.Version,
 	}
 
-	opts := ProjectOpts{Root: "."}
+	return setupPersistentPreRun(cmd, &projectOptions, func(ctx context.Context, args []string) error {
+		mod = jsonnetmod.VModFor(projectOptions.Root)
 
-	return setupPersistentPreRun(cmd, &opts, func(cmd *cobra.Command, args []string) error {
-		mod = jsonnetmod.VModFor(opts.Root)
-
-		if opts.Verbose {
+		if projectOptions.Verbose {
 			zapLog, _ := zap.NewDevelopment()
 			v := log.(zapr.Underlier).GetUnderlying()
 			*v = *zapLog

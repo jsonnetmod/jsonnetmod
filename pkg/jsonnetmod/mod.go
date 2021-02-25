@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/jsonnetfile"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod/jsonnetfile"
 	"github.com/pkg/errors"
 
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod/modfile"
 )
 
 type Mod struct {

@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 
 	"github.com/grafana/tanka/pkg/jsonnet/native"
-	"github.com/octohelm/jsonnetmod/pkg/util"
+	"github.com/jsonnetmod/jsonnetmod/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,12 +29,12 @@ func cmdBuild() *cobra.Command {
 
 	opts := BuildOpts{}
 
-	return setupRun(cmd, &opts, func(cmd *cobra.Command, args []string) error {
+	return setupRun(cmd, &opts, func(ctx context.Context, args []string) error {
 		if len(args) == 0 {
 			return fmt.Errorf("missing input")
 		}
 
-		vm := mod.MakeVM(cmd.Context())
+		vm := mod.MakeVM(ctx)
 
 		for _, nf := range native.Funcs() {
 			vm.NativeFunction(nf)

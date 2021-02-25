@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod/modfile"
 
 	"github.com/google/go-jsonnet"
-	"github.com/octohelm/jsonnetmod/pkg/util"
+	"github.com/jsonnetmod/jsonnetmod/pkg/util"
 )
 
 func VModFor(root string) *VMod {

@@ -3,8 +3,9 @@ package gomod
 import (
 	"context"
 
-	"github.com/octohelm/jsonnetmod/forked/cmd/go/internalpkg/modfetch"
-	"github.com/octohelm/jsonnetmod/forked/cmd/go/internalpkg/modload"
+	"github.com/jsonnetmod/jsonnetmod/internal/forked/cmd/go/internalpkg/cfg"
+	"github.com/jsonnetmod/jsonnetmod/internal/forked/cmd/go/internalpkg/modfetch"
+	"github.com/jsonnetmod/jsonnetmod/internal/forked/cmd/go/internalpkg/modload"
 	"golang.org/x/mod/module"
 )
 
@@ -20,9 +21,9 @@ type Module struct {
 	GoModSum string
 }
 
-// ResolveModule fork from $GOROOT/cmd/go/internalpkg/modfetch
-func ResolveModule(ctx context.Context, path string, version string) *Module {
+func ResolveModule(ctx context.Context, path string, version string, verbose bool) *Module {
 	modload.ForceUseModules = true
+	cfg.BuildX = verbose
 
 	found := modload.ListModules(ctx, []string{path + "@" + version}, false, false, false)
 

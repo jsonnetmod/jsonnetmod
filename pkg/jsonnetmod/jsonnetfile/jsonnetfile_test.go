@@ -3,7 +3,7 @@ package jsonnetfile
 import (
 	"testing"
 
-	"github.com/octohelm/jsonnetmod/pkg/jsonnetmod/modfile"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod/modfile"
 
 	. "github.com/onsi/gomega"
 )

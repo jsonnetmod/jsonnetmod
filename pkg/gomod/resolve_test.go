@@ -18,7 +18,7 @@ func TestDownload(t *testing.T) {
 
 	for p, v := range pkgs {
 		t.Run("download "+p+"@"+v, func(t *testing.T) {
-			e := ResolveModule(ctx, p, v)
+			e := ResolveModule(ctx, p, v, true)
 			t.Log(e.Path, e.Version)
 			NewWithT(t).Expect(e.Error).To(BeEmpty())
 		})
