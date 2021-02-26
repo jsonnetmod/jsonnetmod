@@ -107,7 +107,7 @@ func (v *VMod) Resolve(ctx context.Context, importPath string, importedFrom stri
 		indirect = isSubDirFor(importedFrom, path.Join(v.Dir, v.JPath))
 	}
 
-	if err := v.SetRequireFromImportPath(resolvedImportPath, indirect); err != nil {
+	if err := v.SetRequireFromImportPath(ctx, resolvedImportPath, indirect); err != nil {
 		return "", err
 	}
 
@@ -116,7 +116,7 @@ func (v *VMod) Resolve(ctx context.Context, importPath string, importedFrom stri
 	return dir, nil
 }
 
-func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
+func (v *VMod) SetRequireFromImportPath(ctx context.Context, p *ImportPath, indirect bool) error {
 	modVersion := p.ModVersion
 
 	if mv := v.cache.RepoVersion(p.Repo); mv.Version != "" {
@@ -129,7 +129,7 @@ func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
 		// create symlink
 		p.SetJPath(filepath.Join(v.Dir, v.JPath))
 
-		if err := p.SymlinkOrTouchImportStub(); err != nil {
+		if err := p.SymlinkOrTouchImportStub(ctx); err != nil {
 			return err
 		}
 	}
@@ -163,5 +163,5 @@ func (v *VMod) download(ctx context.Context, importPath string) error {
 		return err
 	}
 
-	return v.SetRequireFromImportPath(p, true)
+	return v.SetRequireFromImportPath(ctx, p, true)
 }

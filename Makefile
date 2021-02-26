@@ -44,5 +44,6 @@ install.forkinternal:
 	go install github.com/jsonnetmod/tools/cmd/forkinternal@3e67f04
 
 install.dev-tools:
+	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	go install github.com/go-courier/husky/cmd/husky@latest

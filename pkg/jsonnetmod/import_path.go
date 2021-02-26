@@ -1,9 +1,11 @@
 package jsonnetmod
 
 import (
+	"context"
 	"fmt"
-	"github.com/jsonnetmod/jsonnetmod/pkg/util"
 	"path/filepath"
+
+	"github.com/jsonnetmod/jsonnetmod/pkg/util"
 )
 
 func ImportPathFor(mod *Mod, importPath string) *ImportPath {
@@ -42,7 +44,7 @@ func (i *ImportPath) SetJPath(jpath string) {
 	i.jpath = jpath
 }
 
-func (i *ImportPath) SymlinkOrTouchImportStub() error {
+func (i *ImportPath) SymlinkOrTouchImportStub(ctx context.Context) error {
 	if i.jpath != "" {
 		if ok, m := i.shouldUseImportStub(); ok {
 			return util.WriteFile(
@@ -52,17 +54,27 @@ func (i *ImportPath) SymlinkOrTouchImportStub() error {
 		}
 
 		if i.replace != nil && i.replace.from != i.replace.to {
-			return util.Symlink(
-				filepath.Join(i.RepoDir(), filepath.Dir(i.SubPath)),
+			// replace should link module dir
+			return i.symlink(
+				ctx,
+				filepath.Join(i.Dir, filepath.Dir(i.SubPath)),
 				filepath.Join(i.jpath, filepath.Dir(i.ImportPath())),
 			)
 		}
 
-		// sub link repo
-		return util.Symlink(i.RepoDir(), filepath.Join(i.jpath, i.Repo))
+		// should link repo
+		return i.symlink(
+			ctx,
+			i.RepoDir(),
+			filepath.Join(i.jpath, i.Repo),
+		)
 	}
 
 	return nil
+}
+
+func (i *ImportPath) symlink(ctx context.Context, from string, to string) error {
+	return util.Symlink(from, to)
 }
 
 func (i *ImportPath) ImportPath() string {
@@ -96,7 +108,7 @@ func (i *ImportPath) shouldUseImportStub() (ok bool, importMethod string) {
 		case ".json", ".yaml", ".yml", ".jsonnet", ".libsonnet":
 			return true, "import"
 		default:
-			return true, "importstr"
+			return false, ""
 		}
 	}
 
