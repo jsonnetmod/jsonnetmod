@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.1.1](https://github.com/jsonnetmod/jsonnetmod/compare/v0.1.0...v0.1.1)
+
+### Bug Fixes
+
+* **fix** fix symlink replaced path ([71fa55f](https://github.com/jsonnetmod/jsonnetmod/commit/71fa55f21d71d758ee416246ae57ff85dcffb5bf))
+
+
+
 # [0.1.0](https://github.com/jsonnetmod/jsonnetmod/compare/v0.0.9...v0.1.0)
 
 ### Features
