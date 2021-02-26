@@ -10,7 +10,6 @@ import (
 	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnetmod/modfile"
 
 	"github.com/google/go-jsonnet"
-	"github.com/jsonnetmod/jsonnetmod/pkg/util"
 )
 
 func VModFor(root string) *VMod {
@@ -103,11 +102,18 @@ func (v *VMod) Resolve(ctx context.Context, importPath string, importedFrom stri
 		return "", err
 	}
 
-	if err := v.SetRequireFromImportPath(resolvedImportPath, !isSubDirFor(importedFrom, v.Dir)); err != nil {
+	indirect := !isSubDirFor(importedFrom, v.Dir)
+	if v.JPath != "" {
+		indirect = isSubDirFor(importedFrom, path.Join(v.Dir, v.JPath))
+	}
+
+	if err := v.SetRequireFromImportPath(resolvedImportPath, indirect); err != nil {
 		return "", err
 	}
 
-	return resolvedImportPath.FullPath(), nil
+	dir := resolvedImportPath.ResolvedImportPath()
+
+	return dir, nil
 }
 
 func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
@@ -120,25 +126,12 @@ func (v *VMod) SetRequireFromImportPath(p *ImportPath, indirect bool) error {
 	v.SetRequire(p.Repo, modVersion, indirect)
 
 	if v.JPath != "" {
-		if err := util.Symlink(p.Dir, filepath.Join(v.Dir, v.JPath, p.Repo)); err != nil {
+		// create symlink
+		p.SetJPath(filepath.Join(v.Dir, v.JPath))
+
+		if err := p.SymlinkOrTouchImportStub(); err != nil {
 			return err
 		}
-
-		for from, to := range v.cache.replace {
-			if from.Path != to.Path && to.Path[0] != '.' {
-				if isSubDirFor(to.Path, p.Repo) {
-					if err := util.Symlink(
-						path.Join(p.Dir, p.SubPath),
-						filepath.Join(v.Dir, v.JPath, from.Path),
-					); err != nil {
-						return err
-					}
-				}
-			}
-		}
-
-		// hack k.libsonnet
-		_ = util.WriteFile(path.Join(p.Dir, v.JPath, "k.libsonnet"), []byte(`import "k/main.libsonnet"`))
 	}
 
 	return modfile.WriteModFile(v.Dir, &v.ModFile)

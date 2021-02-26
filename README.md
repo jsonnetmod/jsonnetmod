@@ -64,8 +64,8 @@ jmod get github.com/grafana/jsonnet-libs@latest
     'github.com/rancher/local-path-provisioner': 'github.com/rancher/local-path-provisioner@v0.0.18',
     // local mod replace
     'github.com/x/a': '../a',
-    // hack for k.libsonnet (force redirect to k/main.libsonnet)
-    k: 'github.com/jsonnet-libs/k8s-alpha/1.19',
+    // import stubs
+    'k.libsonnet': 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet',
     // mod short alias
     'ksonnet-util': 'github.com/grafana/jsonnet-libs/ksonnet-util',
   },

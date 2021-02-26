@@ -2,7 +2,7 @@
   module: 'examples',
   jpath: './vendor',
   replace: {
-    k: 'github.com/jsonnet-libs/k8s-alpha/1.19',
+    'k.libsonnet': 'github.com/jsonnet-libs/k8s-alpha/1.19/main.libsonnet',
     'ksonnet-util': 'github.com/grafana/jsonnet-libs/ksonnet-util',
   },
   require: {

@@ -112,8 +112,8 @@ func (c *ModCache) RepoVersion(repo string) modfile.ModVersion {
 
 type VersionFixer = func(repo string, version string) string
 
-func (c *ModCache) Get(ctx context.Context, importPath string, version string, fixVersion VersionFixer) (*Mod, error) {
-	repo, err := c.repoRoot(ctx, importPath)
+func (c *ModCache) Get(ctx context.Context, pkgImportPath string, version string, fixVersion VersionFixer) (*Mod, error) {
+	repo, err := c.repoRoot(ctx, pkgImportPath)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (c *ModCache) Get(ctx context.Context, importPath string, version string, f
 		version = fixVersion(repo, version)
 	}
 
-	return c.get(ctx, repo, version, importPath)
+	return c.get(ctx, repo, version, pkgImportPath)
 }
 
 const versionUpgrade = "upgrade"
@@ -187,7 +187,6 @@ func (c *ModCache) get(ctx context.Context, repo string, requestedVersion string
 	}
 
 	if root != nil {
-
 		// sub dir may as mod.
 		importPaths := paths(importPath)
 

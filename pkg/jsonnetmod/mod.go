@@ -16,10 +16,10 @@ type Mod struct {
 	modfile.ModVersion
 	// Repo
 	Repo string
-	// RepoSum
-	RepoSum string
-	// Dir
+	// Dir module absolute dir
 	Dir string
+	// RepoSum repo absolute dir sum
+	RepoSum string
 }
 
 func (m *Mod) String() string {
@@ -115,16 +115,14 @@ func (m *Mod) ResolveImportPath(ctx context.Context, cache *ModCache, importPath
 		if replace.Version != "" {
 			fixVersion = nil
 		}
-
-		mod, err := cache.Get(ctxWithUpgradeDisabled, replacedImportPath, replace.Version, fixVersion)
+		mod, err := cache.Get(ctxWithUpgradeDisabled, filepath.Dir(replacedImportPath), replace.Version, fixVersion)
 		if err != nil {
 			return nil, err
 		}
-
-		return ImportPathFor(mod, replacedImportPath), nil
+		return ImportPathFor(mod, replacedImportPath).WithReplace(matched.Path, replace.Path), nil
 	}
 
-	mod, err := cache.Get(ctx, importPath, version, m.fixVersion)
+	mod, err := cache.Get(ctx, filepath.Dir(importPath), version, m.fixVersion)
 	if err != nil {
 		return nil, err
 	}

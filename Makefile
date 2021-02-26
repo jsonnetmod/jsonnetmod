@@ -37,8 +37,12 @@ install: build
 dep:
 	go get -u ./...
 
+fork: install.forkinternal
+	forkinternal cmd/go/internal/modload cmd/go/internal/modfetch
+
 install.forkinternal:
 	go install github.com/jsonnetmod/tools/cmd/forkinternal@3e67f04
 
-fork: install.forkinternal
-	forkinternal cmd/go/internal/modload cmd/go/internal/modfetch
+install.dev-tools:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/go-courier/husky/cmd/husky@latest

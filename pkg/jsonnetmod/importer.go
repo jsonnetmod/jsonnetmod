@@ -12,7 +12,7 @@ import (
 )
 
 type Resolver interface {
-	Resolve(ctx context.Context, importPath string, importedFrom string) (fullDir string, err error)
+	Resolve(ctx context.Context, importedPath string, importedFrom string) (founded string, err error)
 }
 
 func NewImporter(ctx context.Context, resolver Resolver) jsonnet.Importer {
@@ -38,11 +38,6 @@ func (i *Importer) Import(importedFrom, importedPath string) (jsonnet.Contents, 
 }
 
 func (i *Importer) resolve(importedFrom, importedPath string) (string, error) {
-	// hack the `k.libsonnet`
-	if importedPath == "k.libsonnet" {
-		importedPath = "k/main.libsonnet"
-	}
-
 	abs := importedPath
 
 	if !filepath.IsAbs(importedPath) {
@@ -53,16 +48,12 @@ func (i *Importer) resolve(importedFrom, importedPath string) (string, error) {
 		if os.IsNotExist(err) && importedPath[0] == '.' {
 			return "", err
 		}
-
-		p := filepath.Dir(importedPath)
-		filename := filepath.Base(importedPath)
-
-		dir, err := i.resolver.Resolve(i.ctx, p, importedFrom)
+		foundedAt, err := i.resolver.Resolve(i.ctx, importedPath, importedFrom)
 		if err != nil {
 			return "", errors.Wrapf(err, "resolve failed `%s`", importedPath)
 		}
 
-		abs = filepath.Join(dir, filename)
+		abs = foundedAt
 	}
 
 	return abs, nil

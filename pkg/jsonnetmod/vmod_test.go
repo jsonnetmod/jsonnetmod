@@ -19,6 +19,8 @@ func TestVendorMod(t *testing.T) {
 	zapLog, _ := zap.NewDevelopment()
 	ctx := logr.NewContext(context.Background(), zapr.NewLogger(zapLog))
 
+	ctx = WithOpts(ctx, OptVerbose(true))
+
 	t.Run("mod a", func(t *testing.T) {
 		a := VModFor(filepath.Join(cwd, "./testdata/a"))
 
