@@ -5,7 +5,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.1.0](https://github.com/jsonnetmod/jsonnetmod/compare/v0.0.9...v0.1.0)
+
+### Features
+
+* **feat** when jpath set, should return dir under jpath, and support set replace for lib to create import stubs ([62afb2e](https://github.com/jsonnetmod/jsonnetmod/commit/62afb2e22f96d2bd549fcbeece7c8711dc83486e))
+
+
+
 # [0.0.9](https://github.com/jsonnetmod/jsonnetmod/compare/v0.0.8...v0.0.9)
+
 
 
 # [0.0.8](https://github.com/jsonnetmod/jsonnetmod/compare/v0.0.7...v0.0.8)
