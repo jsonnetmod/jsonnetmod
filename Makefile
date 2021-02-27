@@ -17,7 +17,7 @@ k.prune:
 	$(JMOD) k prune ./examples/clusters/demo/hello-world.jsonnet
 
 k.export:
-	$(JMOD) k show -o ./_output ./examples/clusters/demo/*.jsonnet
+	rm -rf ./_output && $(JMOD) k show -o ./_output ./examples/clusters/demo/*.jsonnet
 
 fmt:
 	$(JMOD) fmt -l -w .

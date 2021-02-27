@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/grafana/tanka/pkg/jsonnet/native"
 	"github.com/grafana/tanka/pkg/process"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnet/native"
 	"github.com/jsonnetmod/jsonnetmod/pkg/tanka"
 	"github.com/spf13/cobra"
 )

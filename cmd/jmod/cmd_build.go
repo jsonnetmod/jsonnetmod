@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/grafana/tanka/pkg/jsonnet/native"
+	"github.com/jsonnetmod/jsonnetmod/pkg/jsonnet/native"
 	"github.com/jsonnetmod/jsonnetmod/pkg/util"
 	"github.com/spf13/cobra"
 )

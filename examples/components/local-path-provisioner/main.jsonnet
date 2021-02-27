@@ -39,10 +39,18 @@ local defaultValues = {
   },
 };
 
-{
-  helm: function(values={}) std.native('helmTemplate')(
+local helm = function(c={}, defaultValues={})
+  function(values={}, namespace='default') std.native('helmTemplate')(
     c.name,
     c.__dirname,
-    defaultValues + values + { calledFrom: '/' },
-  ),
+    { calledFrom: '/', namespace: namespace, includeCRDs: true, values: defaultValues + values },
+  ) + {
+    namespace:: namespace,
+  }
+;
+
+{
+  helm: helm(c, defaultValues)
 }
+
+
