@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.1.2](https://github.com/jsonnetmod/jsonnetmod/compare/v0.1.1...v0.1.2)
+
+### Bug Fixes
+
+* **fix** helm should render directly without helm cmd ([3b1063f](https://github.com/jsonnetmod/jsonnetmod/commit/3b1063f23eb5acc2d5b02c552dc71871fb42cd0e))
+
+
+
 # [0.1.1](https://github.com/jsonnetmod/jsonnetmod/compare/v0.1.0...v0.1.1)
 
 ### Bug Fixes
