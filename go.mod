@@ -37,17 +37,11 @@ require (
 	golang.org/x/tools v0.1.0
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	helm.sh/helm/v3 v3.5.2
+	helm.sh/helm/v3 v3.5.1
 	k8s.io/apiextensions-apiserver v0.20.4 // indirect
 	k8s.io/apimachinery v0.20.4
 	k8s.io/klog/v2 v2.5.0 // indirect
 	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.0.3 // indirect
 	sigs.k8s.io/yaml v1.2.0
-)
-
-// needed by helm deps https://github.com/deislabs/oras/blob/v0.10.0/go.mod
-replace (
-	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
-	github.com/docker/docker => github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
 )
