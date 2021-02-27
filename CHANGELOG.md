@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.1.3](https://github.com/jsonnetmod/jsonnetmod/compare/v0.1.2...v0.1.3)
+
+### Bug Fixes
+
+* **fix** lock helm version to avoid deps suck ([02e95d4](https://github.com/jsonnetmod/jsonnetmod/commit/02e95d44b3273e67e8870ef693748c0e1c65d6c4))
+
+
+
 # [0.1.2](https://github.com/jsonnetmod/jsonnetmod/compare/v0.1.1...v0.1.2)
 
 ### Bug Fixes
