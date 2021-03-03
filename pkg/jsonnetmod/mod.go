@@ -96,10 +96,16 @@ func (m *Mod) ResolveImportPath(ctx context.Context, cache *ModCache, importPath
 		// xxx => ../xxx
 		if replace.IsLocalReplace() {
 			mod := &Mod{Dir: filepath.Join(m.Dir, replace.Path)}
+
 			mod.Version = "v0.0.0"
 			if _, err := mod.LoadInfo(); err != nil {
 				return nil, err
 			}
+
+			if mod.Module == "" {
+				mod.Module = filepath.Join(m.Module, replace.Path)
+			}
+
 			cache.Collect(ctx, mod)
 			return ImportPathFor(mod, importPath), nil
 		}
