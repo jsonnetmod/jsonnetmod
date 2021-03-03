@@ -5,6 +5,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
+# [0.1.4](https://github.com/jsonnetmod/jsonnetmod/compare/v0.1.3...v0.1.4)
+
+### Bug Fixes
+
+* **fix** local replace should patch mod module when missing ([b43c374](https://github.com/jsonnetmod/jsonnetmod/commit/b43c37411e2c895bfa93ce7d5d0613d66f5b3efe))
+
+
+
 # [0.1.3](https://github.com/jsonnetmod/jsonnetmod/compare/v0.1.2...v0.1.3)
 
 ### Bug Fixes
